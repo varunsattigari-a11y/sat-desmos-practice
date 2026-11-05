@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desmos SAT Practice</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+<script src="questions.js"></script>
+<script src="skills.js"></script>
+<script src="bank.js"></script>
+<script src="generators.js"></script>
+<script src="priority.js"></script>
+<style>
+:root{
+  --ink:#1e1e1e; --muted:#5b6070; --line:#d9dbe1; --soft:#f3f4f7; --bg:#fff;
+  --blue:#324dc7; --blue-d:#2438a0; --navy:#1b2a5e; --yellow:#fedb00;
+  --ok:#1f7a3a; --ok-bg:#e6f4ea; --bad:#b3261e; --bad-bg:#fbe9e7; --mark:#c2410c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Noto Sans","Segoe UI",system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);font-size:16px}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+
+/* ---------- Start screen ---------- */
+#start{max-width:880px;margin:0 auto;padding:40px 20px 60px}
+#start h1{font-size:30px;margin:0 0 6px;color:var(--navy)}
+#start .sub{color:var(--muted);margin:0 0 28px;line-height:1.5}
+#start .sub a{color:var(--blue)}
+.card{border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+.card h2{font-size:17px;margin:0 0 14px}
+.topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.topics label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;line-height:1.3}
+.topics label:hover{background:var(--soft)}
+.topics input{margin-top:3px;accent-color:var(--blue)}
+.topics small{color:var(--muted);display:block}
+.row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.row label{display:flex;gap:8px;align-items:center}
+.linkbtn{background:none;border:0;color:var(--blue);padding:0;text-decoration:underline}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:24px;padding:10px 26px;font-weight:600}
+.btn:hover{background:var(--blue-d)}
+.btn:disabled{background:#aab3d9;cursor:default}
+.btn.ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.resume{background:#eef1fc;border-color:#c9d1f3}
+
+/* ---------- Test shell ---------- */
+#test{position:fixed;inset:0;display:flex;flex-direction:column}
+header.top{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#e8ecf7;position:relative;flex:none}
+header.top::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;background:repeating-linear-gradient(90deg,#3c3c3c 0 18px,transparent 18px 22px,#e1251b 22px 34px,transparent 34px 38px,#f5a800 38px 50px,transparent 50px 54px,#2a7de1 54px 66px,transparent 66px 70px)}
+.hleft{min-width:0}
+.hleft .sec{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hleft .dirs{background:none;border:0;padding:0;font-size:14px;color:var(--ink)}
+.hcenter{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
+#timer{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+#timer.low{color:var(--bad)}
+#hideTimer{display:block;margin:2px auto 0;font-size:12px;background:#fff;border:1px solid #999;border-radius:12px;padding:1px 10px}
+.hright{display:flex;gap:6px}
+.tool{background:none;border:0;display:flex;flex-direction:column;align-items:center;font-size:12px;gap:2px;padding:4px 10px;border-radius:6px;color:var(--ink)}
+.tool:hover{background:rgba(0,0,0,.06)}
+.tool.on{background:#d3dbf5}
+.tool svg{width:22px;height:22px}
+
+main.body{flex:1;display:flex;min-height:0}
+#calcPane{width:46%;min-width:280px;max-width:75%;border-right:1px solid var(--line);display:flex;flex-direction:column;background:#fff}
+#calcPane .calcbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:#1b1b1b;color:#fff;font-size:14px;font-weight:600}
+#calcPane .calcbar button{background:none;border:0;color:#fff;font-size:13px;padding:2px 8px;border-radius:4px}
+#calcPane .calcbar button:hover{background:#333}
+#calculator{flex:1;min-height:0}
+#calculator iframe{width:100%;height:100%;border:0}
+#drag{width:8px;cursor:col-resize;background:var(--soft);flex:none;display:flex;align-items:center;justify-content:center}
+#drag::before{content:"";width:2px;height:28px;border-left:2px dotted #999}
+#qPane{flex:1;overflow:auto;min-width:0}
+.qwrap{max-width:860px;margin:0 auto;padding:28px 28px 40px}
+.qhead{display:flex;align-items:center;gap:12px;background:var(--soft);border-bottom:2px dashed #b8bcc8;padding:0 10px 0 0;height:38px;margin-bottom:20px}
+.qnum{background:#1e1e1e;color:#fff;font-weight:700;height:38px;min-width:38px;display:flex;align-items:center;justify-content:center}
+.markbtn{background:none;border:0;display:flex;align-items:center;gap:6px;font-size:14px;padding:4px 6px}
+.markbtn svg{width:16px;height:18px}
+.markbtn.on svg path{fill:var(--mark);stroke:var(--mark)}
+.qtopic{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.abc{border:1px solid #333;background:#fff;border-radius:4px;font-size:12px;font-weight:700;padding:2px 6px;text-decoration:line-through}
+.abc.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.stem{font-size:17px;line-height:1.75;margin-bottom:22px}
+.stem .katex{font-size:1.06em}
+table.dt{border-collapse:collapse;margin:4px 0 14px}
+table.dt th,table.dt td{border:1px solid #999;padding:6px 14px;text-align:center}
+table.dt th{background:var(--soft)}
+.choices{display:flex;flex-direction:column;gap:12px}
+.choice{display:flex;align-items:center;gap:10px}
+.opt{flex:1;display:flex;align-items:center;gap:14px;border:1.5px solid #444;border-radius:10px;padding:10px 14px;background:#fff;text-align:left;min-height:52px;position:relative}
+.opt:hover{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue) inset}
+.opt .L{width:28px;height:28px;border:1.5px solid #444;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+.opt.sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue) inset}
+.opt.sel .L{background:var(--blue);border-color:var(--blue);color:#fff}
+.opt.out{color:#999}
+.opt.out .txt{opacity:.55}
+.opt.out::after{content:"";position:absolute;left:-6px;right:-6px;top:50%;border-top:2px solid #333}
+.xout{width:30px;height:30px;border-radius:50%;border:1.5px solid #444;background:#fff;font-size:12px;font-weight:700;text-decoration:line-through;flex:none}
+.xout.undo{text-decoration:underline;border:0;width:auto;font-size:13px}
+.spr{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.spr input{width:180px;font-size:22px;padding:8px 10px;border:1.5px solid #444;border-radius:8px;border-bottom-width:3px;font-family:inherit}
+.spr input:focus{outline:2px solid var(--blue);outline-offset:1px}
+.spr .prev{font-size:15px;color:var(--muted)}
+.spr .prev b{display:block;font-size:22px;color:var(--ink);margin-top:4px;min-height:30px}
+details.sprdir{background:var(--soft);border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:14px;line-height:1.55}
+details.sprdir summary{cursor:pointer;font-weight:600}
+.fb{margin-top:22px;border-radius:10px;padding:14px 16px;line-height:1.6;font-size:15px}
+.fb.ok{background:var(--ok-bg);border:1px solid #a7d7b5}
+.fb.bad{background:var(--bad-bg);border:1px solid #f0b8b2}
+.fb h4{margin:0 0 6px}
+.tip{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.2)}
+.tryd{margin-top:10px;font-size:14px;padding:6px 14px}
+
+footer.bot{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-top:1px solid var(--line);background:#e8ecf7;position:relative}
+footer.bot .who{font-weight:600;font-size:15px}
+#navBtn{position:absolute;left:50%;transform:translateX(-50%);background:#1e1e1e;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-weight:600;display:flex;gap:8px;align-items:center}
+#navBtn:hover{background:#000}
+.fright{display:flex;gap:10px}
+
+/* question navigator popup */
+#navPop{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);width:min(560px,94vw);background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.28);padding:18px 20px 16px;z-index:30}
+#navPop::after{content:"";position:absolute;bottom:-9px;left:50%;margin-left:-9px;border:9px solid transparent;border-bottom:0;border-top-color:#fff}
+#navPop h3{margin:0 0 4px;text-align:center;font-size:16px}
+.legend{display:flex;gap:16px;justify-content:center;font-size:13px;padding:8px 0 12px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.sw{width:14px;height:14px;border:1.5px dashed #555;display:inline-block}
+.sw.ans{background:var(--blue);border:1.5px solid var(--blue)}
+.grid{display:flex;flex-wrap:wrap;gap:10px;max-height:42vh;overflow:auto;padding:4px}
+.cell{width:36px;height:36px;border:1.5px dashed #555;background:#fff;color:var(--blue);font-weight:700;position:relative;display:flex;align-items:center;justify-content:center;font-size:14px}
+.cell.ans{background:var(--blue);color:#fff;border:1.5px solid var(--blue)}
+.cell.cur::before{content:"";position:absolute;top:-12px;left:50%;margin-left:-6px;width:12px;height:12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M6 0C3 0 1 2 1 4.5 1 8 6 12 6 12s5-4 5-7.5C11 2 9 0 6 0z' fill='%231e1e1e'/%3E%3C/svg%3E") no-repeat center/contain}
+.cell.mk::after{content:"";position:absolute;top:-6px;right:-6px;width:11px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpath d='M0 0h10v12L5 8.5 0 12z' fill='%23c2410c'/%3E%3C/svg%3E") no-repeat center/contain}
+.cell.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.cell.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+#navPop .goreview{display:block;margin:14px auto 0}
+
+/* review page */
+#reviewPage{flex:1;overflow:auto}
+#reviewPage .inner{max-width:760px;margin:0 auto;padding:36px 20px;text-align:center}
+#reviewPage h2{font-size:26px;margin:0 0 6px}
+#reviewPage p{color:var(--muted);line-height:1.5}
+#reviewPage .box{border:1px solid var(--line);border-radius:12px;padding:20px;margin-top:20px;text-align:left}
+#reviewPage .grid{max-height:none;justify-content:flex-start}
+
+/* modal */
+.modalBg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:12px;max-width:780px;width:100%;max-height:88vh;overflow:auto;padding:22px 26px;position:relative}
+.modal h2{margin:0 0 12px;font-size:20px}
+.modal .close{position:absolute;top:12px;right:14px;background:none;border:0;font-size:24px;line-height:1}
+.refgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:14px}
+.refgrid div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.6}
+.refgrid b{display:block;margin-bottom:2px}
+.modal ul{line-height:1.7;padding-left:20px}
+
+/* results */
+#results{max-width:980px;margin:0 auto;padding:36px 20px 60px}
+.scorehead{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:24px}
+.big{font-size:56px;font-weight:800;color:var(--navy);line-height:1}
+.big small{font-size:20px;color:var(--muted);font-weight:600}
+.scaled{background:var(--navy);color:#fff;border-radius:12px;padding:12px 18px}
+.scaled b{font-size:28px;display:block}
+.scaled span{font-size:12px;opacity:.85}
+.tbars{display:flex;flex-direction:column;gap:10px}
+.tbar{display:grid;grid-template-columns:minmax(150px,280px) 1fr 64px auto;gap:12px;align-items:center;font-size:14px}
+.tbar .track{height:12px;background:var(--soft);border-radius:6px;overflow:hidden}
+.tbar .fill{height:100%;background:var(--blue);border-radius:6px}
+.tbar a{color:var(--blue);font-size:13px;white-space:nowrap}
+.rlist{margin-top:10px}
+.ritem{border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+.ritem summary{list-style:none;cursor:pointer;display:flex;gap:12px;align-items:center;padding:12px 14px}
+.ritem summary::-webkit-details-marker{display:none}
+.badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex:none}
+.badge.r{background:var(--ok)}.badge.w{background:var(--bad)}.badge.s{background:#888}
+.ritem .meta{font-size:13px;color:var(--muted)}
+.ritem .rbody{padding:0 16px 16px;line-height:1.65}
+.filters{display:flex;gap:8px;margin:18px 0 10px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:4px 14px;font-size:14px}
+.filters button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* image-based (official bank) questions */
+.qimg{display:block;max-width:100%;height:auto;margin:0 0 4px}
+.cimg{display:block;max-width:100%;height:auto}
+.opt .txt{min-width:0}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+.tag.official{background:#e3e8fb;color:var(--blue-d)}
+.tag.original{background:#e6f4ea;color:var(--ok)}
+.tag.generated{background:#fff1d6;color:#8a5a00}
+.tag.video{background:#f1e6fb;color:#6b2fa3}
+.tag.Easy{background:#eef7ee;color:#2f6b2f}.tag.Medium{background:#fff4e0;color:#8a5a00}.tag.Hard{background:#fde8e8;color:var(--bad)}
+.grp{margin-top:14px}
+.grp h3{font-size:14px;margin:0 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:flex;gap:12px;align-items:center}
+.grp h3 button{font-size:13px;text-transform:none;letter-spacing:0}
+.cnt{color:var(--muted);font-size:12px;display:block;margin-top:2px}
+.srcrow label{border:1px solid var(--line);border-radius:8px;padding:10px 12px;flex:1 1 220px;align-items:flex-start}
+.srcrow label small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.srcrow select{font:inherit;padding:2px 4px;margin-left:4px}
+#beginInfo{color:var(--muted);margin-left:14px}
+/* Priority Practice */
+.prio{border:2px solid var(--blue);background:linear-gradient(180deg,#f3f5fd,#fff 120px)}
+.prio-head{display:flex;gap:18px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.prio-head h2{font-size:22px;color:var(--navy);margin:0 0 6px}
+.prio-all{display:flex;flex-direction:column;gap:8px;align-items:flex-end;font-size:14px}
+.prio-all select{font:inherit;margin-left:6px}
+.prio-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.ptopic{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.ptopic h3{margin:0;font-size:15px;display:flex;gap:8px;align-items:baseline}
+.ptopic h3 .n{color:var(--blue);font-variant-numeric:tabular-nums}
+.ptopic .miss{font-size:13px;color:var(--muted);line-height:1.45;margin:0}
+.ptopic details{font-size:13px;line-height:1.5}
+.ptopic summary{cursor:pointer;color:var(--blue);font-weight:600}
+.ptopic .foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:8px}
+.mast{font-size:12px;font-weight:700;border-radius:10px;padding:2px 9px;white-space:nowrap}
+.mast.none{background:var(--soft);color:var(--muted)}.mast.low{background:var(--bad-bg);color:var(--bad)}.mast.mid{background:#fff4e0;color:#8a5a00}.mast.high{background:var(--ok-bg);color:var(--ok)}
+.ptopic .btn{padding:6px 16px;font-size:14px}
+.tag.priority{background:#fde8e8;color:var(--bad)}
+.rulebox{background:#eef1fc;border-left:4px solid var(--blue);border-radius:6px;padding:10px 12px;margin:-6px 0 16px;font-size:14px;line-height:1.5}
+
+@media (max-width:820px){
+  main.body{flex-direction:column}
+  #calcPane{width:100%!important;max-width:none;height:45%;min-width:0;border-right:0;border-bottom:1px solid var(--line)}
+  #drag{display:none}
+  .hleft .sec{font-size:14px;max-width:34vw}
+  header.top,footer.bot{padding:0 12px}
+  .qwrap{padding:18px 16px 30px}
+  .tool span{display:none}
+  footer.bot .who{display:none}
+  #navBtn{position:static;transform:none}
+  .tbar{grid-template-columns:1fr 60px}
+  .tbar .track{grid-column:1/-1;grid-row:2}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ START ============ -->
+<section id="start">
+  <h1>Desmos SAT Math Practice</h1>
+  <p class="sub">Practice built from each chapter of <a href="https://youtu.be/Yy6n2YvhSsQ" target="_blank" rel="noopener">“The Only SAT Desmos Guide You’ll Ever Need (2026)”</a>, your exported official SAT question bank, new practice questions for every SAT math skill, and unlimited auto-generated questions. The Desmos graphing calculator is built in, just like on test day.</p>
+
+  <div id="resumeCard" class="card resume hidden">
+    <h2>You have a test in progress</h2>
+    <div class="row"><button class="btn" id="resumeBtn">Resume test</button><button class="linkbtn" id="discardBtn">Discard it</button></div>
+  </div>
+
+  <div class="card prio" id="prioCard">
+    <div class="prio-head">
+      <div>
+        <h2>Priority Practice</h2>
+        <p class="sub" style="margin:0">Drills for the 10 questions you missed on SAT Practice 10 (Nov 4). Each drill gives instant feedback, shows the rule you need, and makes new numbers every time.</p>
+      </div>
+      <div class="prio-all">
+        <button class="btn" id="prioAll">Drill all 10 topics</button>
+        <label>Questions per topic
+          <select id="prioPer"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="25">25</option></select></label>
+      </div>
+    </div>
+    <div class="prio-list" id="prioList"></div>
+  </div>
+
+  <h2 style="font-size:20px;margin:28px 0 12px;color:var(--navy)">Full practice test builder</h2>
+  <div class="card">
+    <h2>1. Question sources</h2>
+    <div class="row srcrow">
+      <label><input type="checkbox" class="src" value="video" checked><span>Desmos video practice<small id="cnt-video"></small></span></label>
+      <label><input type="checkbox" class="src" value="official" checked><span>Official SAT question bank<small id="cnt-official"></small></span></label>
+      <label><input type="checkbox" class="src" value="original" checked><span>New skill practice<small id="cnt-original"></small></span></label>
+      <label><span>Auto-generated (new numbers every time)
+        <select id="genCount"><option value="0">none</option><option value="10" selected>+10</option><option value="25">+25</option><option value="50">+50</option><option value="100">+100</option></select>
+        <small>For selected topics that support it</small></span></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Choose topics <span id="selCount" style="color:var(--muted);font-weight:400"></span></h2>
+    <div class="row"><button class="linkbtn" id="allBtn">Select all</button><button class="linkbtn" id="noneBtn">Clear</button></div>
+    <div id="topicGroups"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. Difficulty <small style="color:var(--muted);font-weight:400">(applies to official and new questions; video questions aren't rated)</small></h2>
+    <div class="row">
+      <label><input type="checkbox" class="dif" value="Easy" checked> Easy</label>
+      <label><input type="checkbox" class="dif" value="Medium" checked> Medium</label>
+      <label><input type="checkbox" class="dif" value="Hard" checked> Hard</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. Test settings</h2>
+    <div class="row">
+      <label><input type="checkbox" id="optTimer" checked> Timed (SAT pace: about 95 seconds per question)</label>
+      <label><input type="checkbox" id="optShuffle"> Shuffle question order</label>
+      <label><input type="checkbox" id="optPractice"> Practice mode (check each answer right away)</label>
+    </div>
+  </div>
+  <button class="btn" id="beginBtn" style="font-size:17px;padding:12px 34px">Begin test</button><span id="beginInfo"></span>
+</section>
+
+<!-- ============ TEST ============ -->
+<section id="test" class="hidden">
+  <header class="top">
+    <div class="hleft">
+      <div class="sec" id="secTitle">Math</div>
+      <button class="dirs" id="dirBtn">Directions ⌄</button>
+    </div>
+    <div class="hcenter">
+      <div id="timer">--:--</div>
+      <button id="hideTimer">Hide</button>
+    </div>
+    <div class="hright">
+      <button class="tool on" id="calcBtn" title="Calculator">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2.5" width="16" height="19" rx="2"/><rect x="7" y="5.5" width="10" height="4" rx=".5"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01" stroke-width="2.6" stroke-linecap="round"/></svg>
+        <span>Calculator</span></button>
+      <button class="tool" id="refBtn" title="Reference">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h12l4 4v12H4z"/><path d="M8 11h8M8 15h8M8 7h5"/></svg>
+        <span>Reference</span></button>
+      <button class="tool" id="exitBtn" title="Exit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/></svg>
+        <span>Exit</span></button>
+    </div>
+  </header>
+
+  <main class="body" id="qMain">
+    <div id="calcPane">
+      <div class="calcbar"><span>Desmos Graphing Calculator</span><span><button id="clearCalc">Clear</button><button id="collapseCalc">Collapse ✕</button></span></div>
+      <div id="calculator"></div>
+    </div>
+    <div id="drag" title="Drag to resize"></div>
+    <div id="qPane"><div class="qwrap" id="qWrap"></div></div>
+  </main>
+
+  <main class="body hidden" id="reviewMain">
+    <div id="reviewPage"><div class="inner">
+      <h2>Check Your Work</h2>
+      <p>On test day, you won’t be able to move on to the next module until time expires.<br>For these practice questions, you can click <b>Submit</b> when you’re ready.</p>
+      <div class="box">
+        <div class="legend" style="justify-content:flex-start"><span><i class="sw"></i>Unanswered</span><span><i class="sw ans"></i>Answered</span><span>🔖 For Review</span></div>
+        <div class="grid" id="reviewGrid"></div>
+      </div>
+    </div></div>
+  </main>
+
+  <footer class="bot">
+    <div class="who">Practice Student</div>
+    <button id="navBtn"><span id="navLabel">Question 1 of 1</span> <span>⌃</span></button>
+    <div class="fright">
+      <button class="btn" id="backBtn">Back</button>
+      <button class="btn" id="nextBtn">Next</button>
+    </div>
+  </footer>
+
+  <div id="navPop" class="hidden">
+    <h3 id="navTitle">Math Practice Questions</h3>
+    <div class="legend"><span>📍 Current</span><span><i class="sw"></i>Unanswered</span><span>🔖 For Review</span></div>
+    <div class="grid" id="navGrid"></div>
+    <button class="btn ghost goreview" id="goReview">Go to Review Page</button>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="resultsWrap" class="hidden"><div id="results"></div></section>
+
+<!-- modals -->
+<div class="modalBg hidden" id="refModal"><div class="modal">
+  <button class="close" data-close>×</button>
+  <h2>Reference</h2>
+  <div class="refgrid">
+    <div><b>Circle</b>\(A=\pi r^2\)<br>\(C=2\pi r\)</div>
+    <div><b>Rectangle</b>\(A=\ell w\)</div>
+    <div><b>Triangle</b>\(A=\tfrac12 bh\)</div>
+    <div><b>Pythagorean theorem</b>\(c^2=a^2+b^2\)</div>
+    <div><b>Special right triangles</b>\(x,\ x\sqrt3,\ 2x\)  (30°-60°-90°)<br>\(s,\ s,\ s\sqrt2\)  (45°-45°-90°)</div>
+    <div><b>Rectangular prism</b>\(V=\ell wh\)</div>
+    <div><b>Cylinder</b>\(V=\pi r^2h\)</div>
+    <div><b>Sphere</b>\(V=\tfrac43\pi r^3\)</div>
+    <div><b>Cone</b>\(V=\tfrac13\pi r^2h\)</div>
+    <div><b>Pyramid</b>\(V=\tfrac13\ell wh\)</div>
+  </div>
+  <p style="font-size:14px;line-height:1.6">The number of degrees of arc in a circle is 360. The number of radians of arc in a circle is \(2\pi\). The sum of the measures in degrees of the angles of a triangle is 180.</p>
+</div></div>
+
+<div class="modalBg hidden" id="dirModal"><div class="modal">
+  <button class="close" data-close>×</button>
+  <h2>Directions</h2>
+  <p style="line-height:1.6">The questions in this section address a number of important math skills. Use of a calculator is permitted for all questions. A reference sheet, calculator, and these directions can be accessed throughout the test.</p>
+  <p style="line-height:1.6"><b>Unless otherwise indicated:</b></p>
+  <ul><li>All variables and expressions represent real numbers.</li><li>Figures provided are drawn to scale.</li><li>All figures lie in a plane.</li><li>The domain of a given function \(f\) is the set of all real numbers \(x\) for which \(f(x)\) is a real number.</li></ul>
+  <p style="line-height:1.6"><b>For multiple-choice questions</b>, solve each problem and choose the correct answer from the choices provided. Each multiple-choice question has a single correct answer.</p>
+  <p style="line-height:1.6"><b>For student-produced response questions</b>, solve each problem and enter your answer as described below.</p>
+  <ul><li>If you find <b>more than one correct answer</b>, enter only one answer.</li><li>You can enter up to 5 characters for a <b>positive</b> answer and up to 6 characters (including the negative sign) for a <b>negative</b> answer.</li><li>If your answer is a <b>fraction</b> that doesn’t fit in the provided space, enter the decimal equivalent.</li><li>If your answer is a <b>decimal</b> that doesn’t fit in the provided space, enter it by truncating or rounding at the fourth digit.</li><li>If your answer is a <b>mixed number</b> (such as 3½), enter it as an improper fraction (7/2) or its decimal equivalent (3.5).</li><li>Don’t enter <b>symbols</b> such as a percent sign, comma, or dollar sign.</li></ul>
+</div></div>
+
+<script>
+// ---------------- utilities ----------------
+const $ = s => document.querySelector(s);
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const KEY = "desmosSatPractice.v2";
+const LET = ["A","B","C","D"];
+function renderMath(el){
+  if (window.renderMathInElement) renderMathInElement(el,{delimiters:[{left:"\\(",right:"\\)",display:false},{left:"\\[",right:"\\]",display:true}],throwOnError:false});
+  else setTimeout(()=>renderMath(el),150);
+}
+function fmtTime(s){ s=Math.max(0,Math.round(s)); const m=Math.floor(s/60), r=s%60; return (m<10?"0":"")+m+":"+(r<10?"0":"")+r; }
+function parseSPR(v){
+  v = (v||"").trim(); if(!v) return null;
+  if(!/^-?(\d+\.?\d*|\.\d+)(\/\d+(\.\d+)?)?$/.test(v)) return NaN;
+  if(v.includes("/")){ const [n,d]=v.split("/"); return parseFloat(n)/parseFloat(d); }
+  return parseFloat(v);
+}
+function isCorrect(q, ans){
+  if(ans==null || ans==="") return false;
+  if(q.type==="mc") return ans===q.a;
+  const v = parseSPR(ans); if(v==null || isNaN(v)) return false;
+  const s = String(ans).trim(), full = s.length >= (s.startsWith("-") ? 6 : 5);
+  const dec = s.includes(".") && !s.includes("/") ? s.split(".")[1].length : 0;
+  return (q.alts || [q.a]).some(t => Math.abs(v - t) <= (q.tol || 1e-6)
+    // SAT rule: a decimal that fills the answer box may be truncated or rounded at the last digit
+    || (full && dec > 0 && Math.abs(v - t) < Math.pow(10, -dec) + 1e-9));
+}
+function answerText(q){
+  if(q.type==="mc") return LET[q.a];
+  if(q.ad) return q.ad;
+  const a=q.a; if(Number.isInteger(a)) return String(a);
+  if(q.tol) return a.toFixed(3);
+  // show nice fraction where possible
+  for(const d of [2,3,4,5,8]){ const n=a*d; if(Math.abs(n-Math.round(n))<1e-9) return `${a} (or ${Math.round(n)}/${d})`; }
+  return String(a);
+}
+
+// ---------------- question catalog ----------------
+// Topic keys: "v<n>" = video chapter, "s<n>" = SAT skill. Every question gets key, src, and (optionally) diff.
+const CAT = {};
+TOPICS.forEach((t,i)=>CAT["v"+i]={name:t.name, group:"video", t:t.t});
+SKILLS.forEach((s,i)=>CAT["s"+i]={name:s.name, group:s.domain});
+const skillIndex = name => SKILLS.findIndex(s=>s.name===name);
+const arr = x => x==null ? [] : (Array.isArray(x) ? x : [x]);
+const ALLQ = [
+  ...QUESTIONS.map(q=>({...q, key:"v"+q.t, src:"video"})),
+  ...SKILL_QS.map(q=>({...q, key:"s"+q.k, src:"original"})),
+  ...BANK.map(q=>({...q, key:"s"+(q.k!=null ? q.k : skillIndex(q.skill)), src:"official"})),
+];
+const BASE_N = ALLQ.length;
+const SRC_LABEL = {video:"Video practice", official:"Official", original:"New practice", generated:"Generated", priority:"Priority drill"};
+PRIORITY.topics.forEach(t=>CAT[t.key]={name:t.name, group:"priority", rule:t.rule});
+const catName = q => (CAT[q.key]||{name:"Practice"}).name;
+
+// ---------------- start screen ----------------
+const groupsEl = $("#topicGroups");
+const GROUPS = [["video","Desmos video chapters"],["Algebra","Algebra"],["Advanced Math","Advanced Math"],["Problem-Solving and Data Analysis","Problem-Solving & Data Analysis"],["Geometry and Trigonometry","Geometry & Trigonometry"]];
+const genKeys = GEN.keysWithGenerators();
+GROUPS.forEach(([g,title])=>{
+  const keys = Object.keys(CAT).filter(k=>CAT[k].group===g);
+  const box=document.createElement("div"); box.className="grp";
+  box.innerHTML=`<h3>${title} <button class="linkbtn" data-g="${g}" data-v="1">all</button><button class="linkbtn" data-g="${g}" data-v="0">none</button></h3><div class="topics"></div>`;
+  keys.forEach(k=>{
+    const l=document.createElement("label");
+    l.innerHTML=`<input type="checkbox" class="tp" data-g="${g}" value="${k}" checked><span>${CAT[k].name}<span class="cnt" data-k="${k}"></span></span>`;
+    box.querySelector(".topics").appendChild(l);
+  });
+  groupsEl.appendChild(box);
+});
+groupsEl.addEventListener("click",e=>{ const b=e.target.closest("button[data-g]"); if(!b) return;
+  groupsEl.querySelectorAll(`input.tp[data-g="${b.dataset.g}"]`).forEach(x=>x.checked=b.dataset.v==="1"); updateSel(); });
+function chosen(){
+  return { keys:[...document.querySelectorAll("input.tp:checked")].map(x=>x.value),
+    srcs:[...document.querySelectorAll("input.src:checked")].map(x=>x.value),
+    difs:[...document.querySelectorAll("input.dif:checked")].map(x=>x.value),
+    gen:+$("#genCount").value };
+}
+function matches(q, c){ return c.keys.includes(q.key) && c.srcs.includes(q.src) && (!q.diff || c.difs.includes(q.diff)); }
+function updateSel(){
+  const c=chosen();
+  ["video","official","original"].forEach(s=>$("#cnt-"+s).textContent=`${ALLQ.filter(q=>q.src===s).length} questions`);
+  document.querySelectorAll(".cnt").forEach(el=>{
+    const k=el.dataset.k, qs=ALLQ.filter(q=>q.key===k), by=s=>qs.filter(q=>q.src===s).length;
+    el.textContent=[by("video")&&`${by("video")} video`, by("official")&&`${by("official")} official`, by("original")&&`${by("original")} new`, genKeys.includes(k)&&"∞ generated"].filter(Boolean).join(" · ");
+  });
+  const n=ALLQ.filter(q=>matches(q,c)).length, g=c.keys.some(k=>genKeys.includes(k)) ? c.gen : 0;
+  $("#selCount").textContent=`· ${n} questions selected`;
+  $("#beginInfo").textContent = `${n}${g?` + ${g} generated`:""} questions`;
+  $("#beginBtn").disabled = n+g===0;
+}
+document.querySelectorAll("#start input, #genCount").forEach(x=>x.addEventListener("change",updateSel));
+$("#allBtn").onclick=()=>{document.querySelectorAll("input.tp").forEach(x=>x.checked=true);updateSel();};
+$("#noneBtn").onclick=()=>{document.querySelectorAll("input.tp").forEach(x=>x.checked=false);updateSel();};
+updateSel();
+
+// ---------------- state ----------------
+let S = null; // {order:[ALLQ index], cur, ans:{}, mark:{}, out:{}, timed, remaining, practice, checked:{}, done, gen:[generated questions]}
+let tickH = null, abcMode = false;
+
+function save(){ if(S && !S.done) store.set(KEY,S); }
+function attachGenerated(st){ // generated questions live in the saved state; re-append them after the fixed questions
+  ALLQ.length = BASE_N; (st.gen||[]).forEach(q=>ALLQ.push(q));
+}
+const saved = store.get(KEY);
+if(saved && saved.order && !saved.done && saved.base===BASE_N) $("#resumeCard").classList.remove("hidden");
+$("#resumeBtn").onclick=()=>{ S=saved; attachGenerated(S); openTest(); };
+$("#discardBtn").onclick=()=>{ store.del(KEY); $("#resumeCard").classList.add("hidden"); };
+
+// ---------------- Priority Practice ----------------
+const MKEY = "desmosSatPractice.mastery";
+function mastery(){ return store.get(MKEY) || {}; }
+function masteryBadge(k){
+  const m = mastery()[k];
+  if(!m || !m.n) return `<span class="mast none">Not started</span>`;
+  const p = Math.round(100*m.last.r/m.last.n);
+  const cls = p>=85 ? "high" : p>=60 ? "mid" : "low";
+  return `<span class="mast ${cls}" title="${m.r} of ${m.n} correct across all drills">Last drill ${m.last.r}/${m.last.n}${p>=85?" · mastered":""}</span>`;
+}
+function renderPriority(){
+  $("#prioList").innerHTML = PRIORITY.topics.map((t,i)=>`<div class="ptopic">
+    <h3><span class="n">${i+1}</span>${t.name}</h3>
+    <p class="miss">${t.missed}</p>
+    <details><summary>Key rule</summary>${t.rule}</details>
+    <div class="foot">${masteryBadge(t.key)}<button class="btn" data-drill="${t.key}">Drill</button></div>
+  </div>`).join("");
+}
+renderPriority();
+function startPriority(keys){
+  const per = +$("#prioPer").value;
+  const qs = PRIORITY.make(keys, per);
+  ALLQ.length = BASE_N;
+  const order = qs.map(q=>{ ALLQ.push(q); return ALLQ.length-1; });
+  for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+  S = { order, cur:0, ans:{}, mark:{}, out:{}, checked:{}, timed:false, remaining:0, practice:true, done:false, gen:qs, base:BASE_N, priority:true };
+  save(); openTest();
+}
+$("#prioList").addEventListener("click",e=>{ const b=e.target.closest("[data-drill]"); if(b) startPriority([b.dataset.drill]); });
+$("#prioAll").onclick=()=>startPriority(PRIORITY.topics.map(t=>t.key));
+
+$("#beginBtn").onclick=()=>{
+  const c=chosen();
+  let order = ALLQ.map((q,i)=>i).filter(i=>matches(ALLQ[i],c));
+  const gen = GEN.make(c.keys, c.gen);
+  ALLQ.length = BASE_N; gen.forEach(q=>{ order.push(ALLQ.length); ALLQ.push(q); });
+  if($("#optShuffle").checked || gen.length){ for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];} }
+  S = { order, cur:0, ans:{}, mark:{}, out:{}, checked:{}, timed:$("#optTimer").checked, remaining: order.length*95, practice:$("#optPractice").checked, done:false, gen, base:BASE_N };
+  save(); openTest();
+};
+
+// ---------------- Desmos ----------------
+let calc = null;
+function initCalc(){
+  if(calc) return;
+  const el = $("#calculator");
+  if(window.Desmos){
+    calc = Desmos.GraphingCalculator(el,{keypad:true,expressions:true,settingsMenu:true,zoomButtons:true,expressionsTopbar:true,border:false});
+  } else {
+    el.innerHTML = '<iframe src="https://www.desmos.com/calculator" title="Desmos graphing calculator"></iframe>';
+  }
+}
+function loadInDesmos(dz){
+  if(!calc){ alert("The Desmos API didn’t load (are you offline?). Type these into the calculator yourself."); return; }
+  if(!$("#test").classList.contains("hidden") && $("#calcPane").classList.contains("hidden")) toggleCalc(true);
+  setDz(dz, curView);
+}
+let curView = null;
+function setDz(dz, v){
+  calc.setBlank();
+  let ti = 0;
+  dz.forEach((e,i)=>{
+    if(typeof e==="string") calc.setExpression({id:"e"+i, latex:e});
+    else if(e.table){
+      ti++;
+      calc.setExpression({id:"t"+i,type:"table",columns:[
+        {latex:"x_"+ti, values:e.table[0].map(String)},
+        {latex:"y_"+ti, values:e.table[1].map(String)}
+      ]});
+    }
+  });
+  v = v || [-10,10,-10,10];
+  try{ calc.setMathBounds({left:v[0],right:v[1],bottom:v[2],top:v[3]}); }catch(e){}
+}
+$("#clearCalc").onclick=()=>{ if(calc) calc.setBlank(); };
+function toggleCalc(force){
+  const p=$("#calcPane"), d=$("#drag");
+  const show = force!==undefined ? force : p.classList.contains("hidden");
+  p.classList.toggle("hidden",!show); d.classList.toggle("hidden",!show);
+  $("#calcBtn").classList.toggle("on",show);
+  if(show && calc) setTimeout(()=>calc.resize(),30);
+}
+$("#calcBtn").onclick=()=>toggleCalc();
+$("#collapseCalc").onclick=()=>toggleCalc(false);
+// resizable divider
+(function(){
+  const drag=$("#drag"), pane=$("#calcPane"); let on=false;
+  drag.addEventListener("pointerdown",e=>{on=true;drag.setPointerCapture(e.pointerId);document.body.style.userSelect="none";});
+  drag.addEventListener("pointermove",e=>{ if(!on) return; const w=Math.min(window.innerWidth*0.75,Math.max(280,e.clientX)); pane.style.width=w+"px"; if(calc) calc.resize(); });
+  drag.addEventListener("pointerup",()=>{on=false;document.body.style.userSelect="";});
+})();
+
+// ---------------- test flow ----------------
+function openTest(){
+  $("#start").classList.add("hidden"); $("#resultsWrap").classList.add("hidden");
+  $("#test").classList.remove("hidden");
+  initCalc(); showQuestion();
+  clearInterval(tickH);
+  if(S.timed){
+    $("#timer").parentElement.style.visibility="visible";
+    tickH=setInterval(()=>{ S.remaining--; drawTimer(); if(S.remaining%5===0) save(); if(S.remaining<=0){ clearInterval(tickH); alert("Time is up! Your answers will be submitted."); finish(); } },1000);
+  } else { $("#timer").textContent="Untimed"; $("#hideTimer").classList.add("hidden"); }
+  drawTimer();
+}
+let timerHidden=false;
+function drawTimer(){
+  if(!S.timed) return;
+  const t=$("#timer");
+  t.textContent = timerHidden ? "⏱" : fmtTime(S.remaining);
+  t.classList.toggle("low", S.remaining<=300);
+}
+$("#hideTimer").onclick=()=>{ timerHidden=!timerHidden; $("#hideTimer").textContent=timerHidden?"Show":"Hide"; drawTimer(); };
+
+// Image questions are cropped at 2.2x, so show them at about 1.4x PDF size for readability
+const IMG_SCALE = 1.4;
+const imgTag = (src, cls) => `<img class="${cls}" src="${src}" alt="" onload="this.style.width=Math.round(this.naturalWidth/${cls==="cimg" ? 1.2 : IMG_SCALE})+'px'">`;
+function stemHTML(q){ return q.img ? arr(q.img).map(s=>imgTag(s,"qimg")).join("") : q.s; }
+function choiceHTML(q,i){ return q.cimg ? arr(q.cimg[i]).map(s=>imgTag(s,"cimg")).join("") : q.c[i]; }
+function nChoices(q){ return q.cimg ? q.cimg.length : q.c.length; }
+function tagsHTML(q){ return `<span class="tag ${q.src}">${SRC_LABEL[q.src]}</span>${q.diff?`<span class="tag ${q.diff}">${q.diff}</span>`:""}`; }
+
+function curQ(){ return ALLQ[S.order[S.cur]]; }
+function showQuestion(){
+  $("#qMain").classList.remove("hidden"); $("#reviewMain").classList.add("hidden");
+  const qi=S.order[S.cur], q=ALLQ[qi], n=S.cur+1;
+  $("#secTitle").textContent = "Math: Desmos Practice";
+  const marked=!!S.mark[qi], out=S.out[qi]||[], a=S.ans[qi];
+  let h = `<div class="qhead"><div class="qnum">${n}</div>
+    <button class="markbtn ${marked?"on":""}" id="markBtn"><svg viewBox="0 0 12 14"><path d="M1 1h10v12L6 9.5 1 13z" fill="none" stroke="#333" stroke-width="1.4"/></svg>Mark for Review</button>
+    <span class="qtopic" title="${catName(q)}">${catName(q)}</span>
+    ${q.type==="mc"?`<button class="abc ${abcMode?"on":""}" id="abcBtn" title="Cross out answer choices">ABC</button>`:""}</div>
+    <div style="margin:-10px 0 14px">${tagsHTML(q)}</div>`;
+  if(q.type==="spr") h += `<details class="sprdir"><summary>Student-produced response directions</summary>Enter one answer. Positive answers can be up to 5 characters and negative answers up to 6 (including the sign). Fractions like 7/2 are allowed; long decimals can be truncated or rounded at the 4th digit. No symbols such as %, $, or commas.</details>`;
+  h += `<div class="stem">${stemHTML(q)}</div>`;
+  if(q.type==="mc"){
+    h += `<div class="choices">` + [...Array(nChoices(q)).keys()].map(i=>`<div class="choice">
+      <button class="opt ${a===i?"sel":""} ${out.includes(i)?"out":""}" data-i="${i}"><span class="L">${LET[i]}</span><span class="txt">${choiceHTML(q,i)}</span></button>
+      ${abcMode? (out.includes(i)?`<button class="xout undo" data-x="${i}">Undo</button>`:`<button class="xout" data-x="${i}">${LET[i]}</button>`):""}
+    </div>`).join("") + `</div>`;
+  } else {
+    h += `<div class="spr"><input id="sprIn" inputmode="decimal" autocomplete="off" maxlength="6" value="${a??""}" aria-label="Your answer"><div class="prev">Answer Preview:<b id="sprPrev"></b></div></div>`;
+  }
+  if(S.practice && !S.checked[qi]) h += `<button class="btn ghost" id="checkBtn" style="margin-top:22px">Check answer</button>`;
+  if(S.practice && S.checked[qi]) h += feedback(q, a);
+  $("#qWrap").innerHTML = h;
+  renderMath($("#qWrap"));
+  // handlers
+  $("#markBtn").onclick=()=>{ S.mark[qi]=!S.mark[qi]; save(); showQuestion(); };
+  if(q.type==="mc"){
+    $("#abcBtn").onclick=()=>{ abcMode=!abcMode; showQuestion(); };
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(S.practice && S.checked[qi]) return;
+      const i=+b.dataset.i; const o=S.out[qi]||[];
+      if(o.includes(i)) S.out[qi]=o.filter(x=>x!==i);
+      S.ans[qi] = S.ans[qi]===i ? undefined : i; save(); showQuestion();
+    });
+    document.querySelectorAll(".xout").forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.x; const o=S.out[qi]||[];
+      S.out[qi] = o.includes(i)? o.filter(x=>x!==i) : [...o,i];
+      if(S.ans[qi]===i) S.ans[qi]=undefined; save(); showQuestion();
+    });
+  } else {
+    const inp=$("#sprIn");
+    const prev=()=>{ const v=inp.value.trim(); const p=$("#sprPrev");
+      if(!v){p.textContent="";return;}
+      if(v.includes("/")){ const [a,b]=v.split("/"); p.innerHTML=""; try{ katex.render(`${a}\\over ${b||"\\ "}`.replace(/^(-)/,"-"),p,{throwOnError:false}); }catch(e){p.textContent=v;} }
+      else p.textContent=v; };
+    inp.oninput=()=>{ inp.value=inp.value.replace(/[^0-9.\/-]/g,""); const lim=inp.value.startsWith("-")?6:5; if(inp.value.length>lim) inp.value=inp.value.slice(0,lim); S.ans[qi]=inp.value; save(); prev(); };
+    if(S.practice && S.checked[qi]) inp.disabled=true;
+    prev();
+  }
+  const cb=$("#checkBtn"); if(cb) cb.onclick=()=>{ S.checked[qi]=true; save(); showQuestion(); };
+  document.querySelectorAll(".tryd").forEach(b=>b.onclick=()=>{ curView=q.v; loadInDesmos(q.dz); });
+  // footer
+  $("#navLabel").textContent=`Question ${n} of ${S.order.length}`;
+  $("#backBtn").classList.toggle("hidden", S.cur===0);
+  $("#nextBtn").textContent="Next";
+  $("#qPane").scrollTop=0;
+  buildGrid($("#navGrid"), true);
+}
+function feedback(q, a){
+  const ok=isCorrect(q,a);
+  return `<div class="fb ${ok?"ok":"bad"}"><h4>${ok?"✓ Correct":"✗ "+(a==null||a===""?"Not answered":"Incorrect")}. Answer: ${answerText(q)}</h4>
+    <div>${q.e}</div>${q.d?`<div class="tip"><b>Desmos strategy:</b> ${q.d}</div>`:""}
+    ${q.src==="priority" && CAT[q.key]?.rule ? `<div class="tip"><b>Key rule:</b> ${CAT[q.key].rule}</div>` : ""}
+    ${q.dz?`<button class="btn ghost tryd">Show this in Desmos</button>`:""}</div>`;
+}
+function buildGrid(el, popup){
+  el.innerHTML="";
+  S.order.forEach((qi,k)=>{
+    const b=document.createElement("button"); b.className="cell";
+    const a=S.ans[qi]; if(a!=null && a!=="") b.classList.add("ans");
+    if(S.mark[qi]) b.classList.add("mk");
+    if(popup && k===S.cur) b.classList.add("cur");
+    b.textContent=k+1;
+    b.onclick=()=>{ S.cur=k; save(); $("#navPop").classList.add("hidden"); showQuestion(); };
+    el.appendChild(b);
+  });
+}
+$("#navBtn").onclick=()=>{ buildGrid($("#navGrid"),true); $("#navPop").classList.toggle("hidden"); };
+document.addEventListener("click",e=>{ const p=$("#navPop"); if(!p.classList.contains("hidden") && !p.contains(e.target) && !$("#navBtn").contains(e.target)) p.classList.add("hidden"); });
+$("#goReview").onclick=()=>{ $("#navPop").classList.add("hidden"); showReview(); };
+function showReview(){
+  $("#qMain").classList.add("hidden"); $("#reviewMain").classList.remove("hidden");
+  buildGrid($("#reviewGrid"),false);
+  $("#navLabel").textContent="Review Page";
+  $("#backBtn").classList.remove("hidden");
+  $("#nextBtn").textContent="Submit";
+  S.onReview=true;
+}
+$("#nextBtn").onclick=()=>{
+  if(S.onReview){ const un=S.order.filter(qi=>S.ans[qi]==null||S.ans[qi]==="").length;
+    if(!un || confirm(`You have ${un} unanswered question${un>1?"s":""}. Submit anyway?`)) finish(); return; }
+  if(S.cur<S.order.length-1){ S.cur++; save(); showQuestion(); } else showReview();
+};
+$("#backBtn").onclick=()=>{
+  if(S.onReview){ S.onReview=false; showQuestion(); return; }
+  if(S.cur>0){ S.cur--; save(); showQuestion(); }
+};
+document.addEventListener("keydown",e=>{
+  if($("#test").classList.contains("hidden") || e.target.tagName==="INPUT" || e.target.closest?.("#calculator")) return;
+  if(e.key==="ArrowRight") $("#nextBtn").click(); if(e.key==="ArrowLeft" && !$("#backBtn").classList.contains("hidden")) $("#backBtn").click();
+});
+$("#exitBtn").onclick=()=>{ if(confirm("Exit the test? Your progress is saved and you can resume later.")){ clearInterval(tickH); save(); location.reload(); } };
+
+// modals
+$("#refBtn").onclick=()=>{ $("#refModal").classList.remove("hidden"); renderMath($("#refModal")); };
+$("#dirBtn").onclick=()=>{ $("#dirModal").classList.remove("hidden"); renderMath($("#dirModal")); };
+document.querySelectorAll(".modalBg").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m || e.target.dataset.close!==undefined) m.classList.add("hidden"); }));
+
+// ---------------- results ----------------
+function finish(){
+  clearInterval(tickH); S.done=true; S.onReview=false; store.del(KEY);
+  if(S.priority){ // record per-topic mastery for the Priority Practice cards
+    const m = mastery(), run = {};
+    S.order.forEach(qi=>{ const q=ALLQ[qi]; if(q.src!=="priority") return; run[q.key]=run[q.key]||{r:0,n:0}; run[q.key].n++; if(isCorrect(q,S.ans[qi])) run[q.key].r++; });
+    Object.entries(run).forEach(([k,v])=>{ const o=m[k]||{r:0,n:0}; m[k]={r:o.r+v.r, n:o.n+v.n, last:v}; });
+    store.set(MKEY, m);
+  }
+  $("#test").classList.add("hidden"); $("#resultsWrap").classList.remove("hidden");
+  const total=S.order.length, right=S.order.filter(qi=>isCorrect(ALLQ[qi],S.ans[qi])).length;
+  const pct=right/total;
+  const scaled = Math.round((200 + 600*Math.pow(pct,1.15))/10)*10;
+  const byT={}; S.order.forEach(qi=>{ const q=ALLQ[qi]; byT[q.key]=byT[q.key]||{r:0,n:0}; byT[q.key].n++; if(isCorrect(q,S.ans[qi])) byT[q.key].r++; });
+  let h=`<h1 style="margin:0 0 18px;color:var(--navy)">Your Results</h1>
+   <div class="scorehead"><div class="big">${right}<small> / ${total} correct</small></div>
+   <div class="scaled"><b>≈ ${scaled}</b><span>Rough SAT Math estimate<br>(unofficial, for motivation only)</span></div>
+   <div style="display:flex;gap:10px;margin-left:auto"><button class="btn ghost" id="retryWrong">Retry missed questions</button><button class="btn" id="newTest">New test</button></div></div>
+   <div class="card"><h2>Score by topic</h2><div class="tbars">`;
+  Object.keys(byT).sort((a,b)=>a[0]===b[0] ? a.slice(1)-b.slice(1) : (a[0]==="v"?-1:1)).forEach(k=>{ const v=byT[k], p=Math.round(100*v.r/v.n), c=CAT[k]||{name:k};
+    h+=`<div class="tbar"><span>${c.name}</span><div class="track"><div class="fill" style="width:${p}%;background:${p>=80?"var(--ok)":p>=50?"var(--blue)":"var(--bad)"}"></div></div><b>${v.r}/${v.n}</b>
+      ${c.t!=null?`<a href="https://youtu.be/Yy6n2YvhSsQ?t=${c.t}" target="_blank" rel="noopener">▶ Rewatch lesson</a>`:"<span></span>"}</div>`; });
+  h+=`</div></div><div class="card"><h2>Answer review</h2>
+   <div class="filters"><button class="on" data-f="all">All</button><button data-f="w">Missed</button><button data-f="r">Correct</button><button data-f="m">Marked for review</button></div>
+   <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+   <div class="rlist" id="rlist" style="flex:1 1 420px;min-width:0"></div>
+   <div id="rcalcWrap" style="flex:1 1 380px;position:sticky;top:12px;height:460px;border:1px solid var(--line);border-radius:10px;overflow:hidden"></div></div></div>`;
+  $("#results").innerHTML=h;
+  // move calculator under results
+  const cw=$("#rcalcWrap"); cw.appendChild($("#calculator")); $("#calculator").style.height="100%"; if(calc) setTimeout(()=>calc.resize(),50);
+  const list=$("#rlist");
+  S.order.forEach((qi,k)=>{
+    const q=ALLQ[qi], a=S.ans[qi], blank=(a==null||a===""), ok=isCorrect(q,a);
+    const yours = blank? "—" : (q.type==="mc"? LET[a] : a);
+    const d=document.createElement("details"); d.className="ritem"; d.dataset.k = ok?"r":"w"; d.dataset.m = S.mark[qi]?"1":"";
+    d.innerHTML=`<summary><span class="badge ${ok?"r":blank?"s":"w"}">${k+1}</span><div style="min-width:0"><div class="meta">${catName(q)} ${tagsHTML(q)}</div><div>Your answer: <b>${yours}</b> · Correct: <b>${answerText(q)}</b></div></div></summary>
+      <div class="rbody"><div class="stem" style="font-size:16px">${stemHTML(q)}</div>
+      ${q.type==="mc"? `<ol type="A" style="margin-top:-10px">${[...Array(nChoices(q)).keys()].map(i=>`<li style="${i===q.a?"color:var(--ok);font-weight:700;outline:2px solid var(--ok);outline-offset:2px":(i===a?"color:var(--bad);outline:2px solid var(--bad);outline-offset:2px":"")};margin:8px 0">${choiceHTML(q,i)}</li>`).join("")}</ol>`:""}
+      ${feedback(q,a)}</div>`;
+    d.querySelector(".tryd")?.addEventListener("click",()=>{ curView=q.v; loadInDesmos(q.dz); });
+    list.appendChild(d);
+  });
+  renderMath($("#results"));
+  document.querySelectorAll(".filters button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(".filters button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+    const f=b.dataset.f; list.querySelectorAll(".ritem").forEach(it=>{ it.style.display = f==="all"||(f==="m"?it.dataset.m:it.dataset.k===f) ? "" : "none"; });
+  });
+  $("#newTest").onclick=()=>location.reload();
+  $("#retryWrong").onclick=()=>{
+    const missed=S.order.filter(qi=>!isCorrect(ALLQ[qi],S.ans[qi]));
+    if(!missed.length){ alert("You didn’t miss any. Nice work!"); return; }
+    $("#calcPane").insertBefore($("#calculator"), null); $("#calculator").style.height="";
+    S={order:missed,cur:0,ans:{},mark:{},out:{},checked:{},timed:false,remaining:0,practice:true,done:false,gen:S.gen,base:BASE_N};
+    save(); openTest(); toggleCalc(true);
+  };
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
